@@ -1,0 +1,482 @@
+//
+//  Card.h
+//  blackjack
+//
+//
+
+#import <Foundation/Foundation.h>
+
+typedef enum {
+    
+    Heart,
+    
+    Spade,
+    
+    Diamond,
+    
+    Club
+    
+} Suit;
+
+@interface Card : NSObject {
+}
+
+@property Suit aSuit;
+
+@property NSInteger cardNumb;
+
+
+-(id) initWithCardNumber:(NSInteger) aCardNumbsuit:(Suit) aSuit;
+
+-(NSInteger) strength;
+
+@end
+
+
+
+//
+//
+//
+//
+//  Card.m
+//  blackjack
+//
+
+#import "Card.h"
+
+@implementation Card
+
+@synthesize aSuit = _aSuit, cardNumb=_cardNumb;
+
+-(id) initWithCardNumber:(NSInteger)aCardNumb aSuit:(Suit)aSuit {
+
+    if (self = [super init])
+    {
+        _aSuit = aSuit;
+        
+        _cardNumb = aCardNumb;
+        
+    }
+    
+    return self;
+}
+
+
+-(NSInteger) strength {
+
+    if (_cardNumb>=10)
+    
+        return (10);
+        
+    else if (_cardNumb==1)
+    
+        return (11);
+        
+    else
+    
+        return (_cardNumb);
+}
+
+
+-(NSString *) suitAsString{
+
+    switch (_aSuit) {
+    
+        case Heart:
+        
+            return @"Heart";
+            
+            break;
+            
+        case Spade:
+        
+            return @"Spade";
+            
+            break;
+            
+        case Diamond:
+        
+            return @"Diamond";
+            
+            break;
+            
+        case Club:
+        
+            return @"Club";
+            
+            break;
+            
+        default:
+        
+            return nil;
+            
+            break;
+    }
+}
+
+
+-(NSString *) cardNumberAsString{
+
+    switch (_cardNumb) {
+        case 1:
+        
+            return @"Ace";
+            break;
+            
+        case 11:
+        
+            return @"Jack";
+            break;
+            
+        case 12:
+        
+            return @"Queen";
+            break;
+            
+        case 13:
+        
+            return @"King";
+            break;
+            
+        default:
+        
+            return [NSString stringWithFormat:@"%d", _cardNumb];
+            break;
+    }
+}
+
+-(NSString *) description {
+
+    return [NSString stringWithFormat:@"%@%@ (strength = %d)", [self suitAsString], [self cardNumberAsString], [self strength]];
+}
+
+@end
+
+
+//
+//
+//
+//
+//  Deck.h
+//  blackjack
+//
+//
+
+#import <Foundation/Foundation.h>
+
+@class Card;
+
+@interface Deck : NSObject {
+
+    NSMutableArray *cards;
+}
+
+-(Card *) drawC;
+
+-(void) shuffleD;
+
+@end
+
+
+//
+//
+//
+//
+//  Deck.m
+//  blackjack
+//
+//
+
+#import "Deck.h"
+
+#import "Card.h"
+
+@implementation Deck
+
+-(id) init {
+    if (self = [super init])
+    {
+        cards = [[NSMutableArray alloc] init];
+        
+        for (int aSuit = 0; aSuit <= 3; aSuit++)
+        {
+            for (int cardNumb = 1; cardNumb <= 13; cardNumb++)
+            {
+                [cards addObject:[[Card alloc] initWithCardNumber:cardNumb aSuit:aSuit]];
+            }
+        }
+        
+        [self shuffleD];
+    }
+    return self;
+}
+
+-(Card *) drawC {
+
+    if ([cards count]>0)
+    {
+    
+        Card* tCard = [cards lastObject];
+        
+        [cards removeLastObject];
+        
+        return tCard;
+    }
+    
+    return nil;
+}
+
+-(void) shuffleD {
+
+    NSUInteger count = [cards count];
+    
+    for (NSUInteger i = 0; i < count; ++i) {
+    
+        int nElements = count - i;
+        
+        int n = (arc4random() % nElements) + i;
+        
+        [cards exchangeObjectAtIndex:i withObjectAtIndex:n];
+    }
+}
+
+- (NSString *)description{
+
+    return [NSString stringWithFormat:@"Deck : %@", cards];
+}
+
+@end
+
+
+//
+//
+//
+//
+//  Hand.h
+//  blackjack
+//
+//
+
+#import <Foundation/Foundation.h>
+
+@class Card;
+
+@interface Hand : NSObject {
+}
+
+@property NSMutableArray *cardsInHand;
+
+-(void) add:(Card *)card;
+
+-(NSInteger) getStrength;
+
+-(NSInteger) count;
+
+-(Card *) getCardAtIndex:(NSInteger) index;
+
+@end
+
+
+//
+//
+//
+//
+//  Hand.m
+//  blackjack
+//
+//
+
+#import "Hand.h"
+
+#import "Card.h"
+
+@implementation Hand
+
+-(id) init {
+
+    if ((self = [super init])){
+    
+        self.cardsInHand = [[NSMutableArray alloc] initWithCapacity:2];
+    }
+    
+    return (self);
+    
+}
+
+-(NSInteger) count {
+
+    return ([self.cardsInHand count]);
+    
+}
+
+-(void) add:(Card *)card {
+    [self.cardsInHand addObject:card];
+}
+
+-(NSInteger) getStrength {
+    NSInteger aVal = 0;
+    for (Card *tCard in self.cardsInHand) {
+        aVal = aVal + [tCard strength];
+    }
+    return aVal;
+}
+
+-(Card *) getCardAtIndex:(NSInteger) index
+{
+    return ([self.cardsInHand objectAtIndex:index]);
+}
+
+-(NSString *)description{
+    return [NSString stringWithFormat:@"cards in hand : %@", self.cardsInHand];
+}
+
+@end
+
+
+
+
+//
+//
+////
+//  ViewController.h
+//  blackjack
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ViewController : UIViewController
+
+
+@end
+
+
+//
+//
+//
+//
+//  theModel.h
+//  blackjack
+//
+//
+
+#import <Foundation/Foundation.h>
+
+#import "Deck.h"
+
+#import "Hand.h"
+
+
+@interface TheModel : NSObject {
+
+    Hand *dealerHand;
+    
+    Hand *playerHand;
+    
+    Deck *deck;
+}
+
+@property Hand *dealerHand;
+
+@property Hand *playerHand;
+
+@property Deck *deck;
+
+-(void) setup;
+
+@end
+
+
+
+//
+//
+//
+//
+//  theModel.m
+//  blackjack
+//
+//
+
+#import "theModel.h"
+
+@implementation TheModel
+
+@synthesize playerHand = _playerHand;
+
+@synthesize dealerHand = _dealerHand;
+
+@synthesize deck = _deck;
+
+
+-(id) init {
+
+    if ((self = [super init])){
+    
+        _deck = [[Deck alloc] init];
+        
+        _playerHand = [[Hand alloc] init];
+        
+        _dealerHand = [[Hand alloc] init];
+    }
+    return (self);
+}
+
+-(void)setup
+{
+    [_playerHand add:[_deck draw]];
+    
+    [_dealerHand add:[_deck draw]];
+    
+    [_playerHand add:[_deck draw]];
+    
+    [_dealerHand add:[_deck draw]];
+    
+    NSLog ([NSString stringWithFormat:@"Player:%@", _playerHand.description] );
+    
+    NSLog ([NSString stringWithFormat:@"Dealer:%@", _dealerHand.description] );
+    
+}
+
+@end
+
+
+//
+//
+//
+//  ViewController.m
+//  blackjack
+//
+//
+
+#import "ViewController.h"
+
+#import "Deck.h"
+
+#import "theModel.h"
+
+@interface ViewController ()
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+
+    [super viewDidLoad];
+    
+    TheModel *aModel = [[TheModel alloc ] init];
+    
+    [aModel setup];
+
+}
+
+- (void)didReceiveMemoryWarning {
+
+    [super didReceiveMemoryWarning];
+    
+    // Dispose of any resources that can be recreated.
+}
+
+@end
+
+
